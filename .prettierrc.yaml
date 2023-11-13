@@ -1,0 +1,13 @@
+arrowParens: "always"
+trailingComma: "es5"
+endOfLine: "lf"
+bracketSameLine: true
+bracketSpacing: true
+singleQuote: false
+semi: true
+tabWidth: 4
+
+overrides:
+  - files: "*.html"
+    options:
+      parser: angular
