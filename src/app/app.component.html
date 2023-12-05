@@ -1,11 +1,14 @@
 <div [ngClass]="'search-box'">
+
   <div [ngClass]="'row'">
-    <input type="text" #inputBox placeholder="Search anything" autocomplete="off">
-    <button><i [ngClass]="['fa-solid', 'fa-magnifying-glass']"></i></button>
+    <input  #inputBox type="text" placeholder="Search anything" autocomplete="off">
+    <button #clearBtn (click)="clearInput($event)"><i [ngClass]="['fa-solid', 'fa-close']"></i></button>
   </div>
+
   <div [ngClass]="'result-box'">
-    <ul *ngIf="results$ | async" >
-      <li *ngFor="let suggestion of results$ | async">{{ suggestion }}</li>
+    <ul>
+      <li *ngFor="let suggestion of result$ | async">{{ suggestion }}</li>
     </ul>
   </div>
+
 </div>

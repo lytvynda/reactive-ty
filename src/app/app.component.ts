@@ -14,8 +14,8 @@ import {
     takeUntil,
     map,
     scan,
-    filter,
-    tap,
+    merge,
+    Observable,
 } from "rxjs";
 
 @Component({
@@ -27,30 +27,59 @@ export class AppComponent implements AfterViewInit, OnDestroy {
     @ViewChild("inputBox", { static: true })
     inputRef: ElementRef | undefined;
 
-    results$ = new Subject<string[]>();
-    private destroy$ = new ReplaySubject<null>();
+    @ViewChild("clearBtn", { static: true })
+    clearBtnRef: ElementRef | undefined;
+
+    inputChanges$: Subject<KeyboardEvent> = new Subject<KeyboardEvent>();
+    clearBtnClicks$: Subject<MouseEvent> = new Subject<MouseEvent>();
+    private destroySignals$: ReplaySubject<null> = new ReplaySubject<null>();
+
+    suggestions$: Observable<Array<string>> = this.inputChanges$.pipe(
+        debounceTime(300),
+        map((event: KeyboardEvent) =>
+            (event.target as HTMLInputElement).value.trim()
+        ),
+        distinctUntilChanged(),
+        scan((acc: string[], curr: string) => (acc.push(curr), acc), []) // Take until click request to cancle
+    );
+
+    clearSuggestions$$: Observable<Array<string>> = this.clearBtnClicks$.pipe(
+        map(() => [])
+    );
+
+    result$: Observable<string[]> = merge(
+        this.clearSuggestions$$,
+        this.suggestions$
+    );
+
+    clearInput = (event: Event) => {
+        event.preventDefault();
+        if (this.inputRef === undefined) return;
+
+        this.inputRef.nativeElement.value = "";
+    };
 
     ngAfterViewInit(): void {
-        fromEvent<KeyboardEvent>(this.inputRef?.nativeElement, "keyup")
-            .pipe(
-                debounceTime(300),
-                map((event) => (event.target as HTMLInputElement).value.trim()),
-                filter(Boolean),
-                distinctUntilChanged(),
-                scan(
-                    (acc: string[], curr: string) => (acc.push(curr), acc),
-                    []
-                ),
-                takeUntil(this.destroy$),
-                tap(console.log)
+        if (this.inputRef !== undefined) {
+            merge(
+                fromEvent<KeyboardEvent>(this.inputRef.nativeElement, "keyup"),
+                fromEvent<KeyboardEvent>(this.inputRef.nativeElement, "paste")
             )
-            .subscribe(this.results$);
+                .pipe(takeUntil(this.destroySignals$))
+                .subscribe(this.inputChanges$);
+        }
+
+        if (this.clearBtnRef !== undefined) {
+            fromEvent<MouseEvent>(this.clearBtnRef.nativeElement, "click")
+                .pipe(takeUntil(this.destroySignals$))
+                .subscribe(this.clearBtnClicks$);
+        }
     }
 
     ngOnDestroy(): void {
-        if (this.destroy$) {
-            this.destroy$.next(null);
-            this.destroy$.complete();
+        if (this.destroySignals$) {
+            this.destroySignals$.next(null);
+            this.destroySignals$.complete();
         }
     }
 }

@@ -48,6 +48,10 @@ button .fa-solid {
   padding: 15px 10px;
 }
 
+.result-box ul:empty {
+  padding: 0;
+}
+
 .result-box ul li {
   list-style: none;
   border-radius: 3px;

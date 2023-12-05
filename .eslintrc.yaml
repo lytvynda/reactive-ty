@@ -34,7 +34,7 @@ overrides:
         - warn
         - always
         - ignoreConsecutiveComments: true
-      curly: [error, multi, consistent]
+      curly: [error, multi-line, consistent]
   - files:
       - "*.html"
     extends:
