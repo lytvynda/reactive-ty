@@ -1,14 +1,13 @@
-<div [ngClass]="'search-box'">
-
-  <div [ngClass]="'row'">
-    <input  #inputBox type="text" placeholder="Search anything" autocomplete="off">
-    <button #clearBtn (click)="clearInput($event)"><i [ngClass]="['fa-solid', 'fa-close']"></i></button>
+<form action="#" method="GET" class="search-form">
+  <div class="row">
+    <input  id="search" class="search-input" #inputBox type="search" placeholder="News topic" autocomplete="off">
+    <label for="search" class="screen-reader-text">News topic</label>
+    <button class="clear-button" #clearBtn><i [ngClass]="['fa-solid', 'fa-close']"></i></button>
   </div>
 
-  <div [ngClass]="'result-box'">
+  <div class="result-box">
     <ul>
       <li *ngFor="let suggestion of result$ | async">{{ suggestion }}</li>
     </ul>
   </div>
-
-</div>
+</form>

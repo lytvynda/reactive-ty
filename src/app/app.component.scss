@@ -1,47 +1,87 @@
-.search-box {
+::placeholder {
+  color: transparent;
+}
+
+.search-form {
+  --clearButtonWidth: 50px;
+  --inputHeight: 50px;
+
   width: 600px;
+  overflow: hidden;
+  position: relative;
   background: white;
   margin: 200px auto 0;
   border-radius: 5px;
+
+  .row {
+    display: flex;
+    align-items: center;
+    padding: 10px 20px;
+
+    .screen-reader-text {
+      position: absolute;
+      top: calc(var(--inputHeight) / 2);
+      left: 20px;
+      color: #777;
+      pointer-events: none;
+      transform-origin: left center;
+      transition: transform 0.25s;
+      font-weight: bold;
+    }
+
+    .search-input:focus + .screen-reader-text,
+    .search-input:not(:placeholder-shown) + .screen-reader-text {
+      transform: translateY(-135%) scale(0.75);
+      color: #333;
+    }
+
+    .search-input {
+      flex: 1;
+      height: var(--inputHeight);
+      width: 100%;
+      background: transparent;
+      padding-right: calc(var(--clearButtonWidth) - 0.5rem);
+      border: 0;
+      outline: 0;
+      font-size: 18px;
+      color: #333;
+    }
+
+    .search-input:not(:placeholder-shown) ~ .clear-button {
+      transform: translateX(calc(-1 * var(--clearButtonWidth) - 10px));
+    }
+
+    .clear-button {
+      position: absolute;
+      padding: 0.5rem;
+      left: 100%;
+      width: var(--clearButtonWidth);
+      transition: all 0.3s ease-in-out;
+      border: 0;
+      background: transparent;
+    }
+
+    .clear-button .fa-solid {
+      width: 25px;
+      color: #555;
+      font-size: 22px;
+      cursor: pointer;
+      transition: transform 0.3s;
+    }
+
+    .clear-button .fa-solid:hover {
+      transition-delay: .1s;
+      -ms-transform: scale(1.5);
+      -webkit-transform: scale(1.5);
+      transform: scale(1.5);
+    }
+  }
 }
 
-.row {
-  display: flex;
-  align-items: center;
-  padding: 10px 20px;
-}
-
-input {
-  flex: 1;
-  height: 50px;
-  background: transparent;
-  border: 0;
-  outline: 0;
-  font-size: 18px;
-  color: #333;
-}
-
-button {
-  background: transparent;
-  border: 0;
-  outline: 0;
-}
-
-button .fa-solid {
-  width: 25px;
-  color: #555;
-  font-size: 22px;
-  cursor: pointer;
-}
-
-::placeholder {
-  color: #555;
-}
-
-/* .result-box {
-  max-height: 300px;
+.result-box {
+  max-height: 40vh;
   overflow-y: scroll;
-} */
+}
 
 .result-box ul {
   border-top: 1px solid #999;
@@ -57,8 +97,17 @@ button .fa-solid {
   border-radius: 3px;
   padding: 15px 10px;
   cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .result-box ul li:hover {
   background: #e9f3ff;
+}
+
+@media (max-width: 700px) {
+  .search-box {
+    width: 80%;
+  }
 }

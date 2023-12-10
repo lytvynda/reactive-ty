@@ -16,6 +16,9 @@ import {
     scan,
     merge,
     Observable,
+    tap,
+    filter,
+    delay,
 } from "rxjs";
 
 @Component({
@@ -34,30 +37,37 @@ export class AppComponent implements AfterViewInit, OnDestroy {
     clearBtnClicks$: Subject<MouseEvent> = new Subject<MouseEvent>();
     private destroySignals$: ReplaySubject<null> = new ReplaySubject<null>();
 
+    clearInputSignals$ = this.clearBtnClicks$.pipe(
+        tap(() => {
+            if (this.inputRef === undefined) return;
+            this.inputRef.nativeElement.value = "";
+        })
+    );
+
+    backspaces$: Observable<Array<string>> = this.inputChanges$.pipe(
+        filter((event: KeyboardEvent) => event.key === "Backspace"),
+        map(() => [])
+    );
+
+    refreshSuggestionsSignals$: Observable<Array<string>> = merge(
+        this.clearInputSignals$,
+        this.backspaces$
+    ).pipe(map(() => []));
+
     suggestions$: Observable<Array<string>> = this.inputChanges$.pipe(
-        debounceTime(300),
+        debounceTime(200),
         map((event: KeyboardEvent) =>
             (event.target as HTMLInputElement).value.trim()
         ),
         distinctUntilChanged(),
-        scan((acc: string[], curr: string) => (acc.push(curr), acc), []) // Take until click request to cancle
-    );
-
-    clearSuggestions$$: Observable<Array<string>> = this.clearBtnClicks$.pipe(
-        map(() => [])
+        scan((acc: string[], curr: string) => (acc.push(curr), acc), []), // Take until click request to cancel
+        delay(1000)
     );
 
     result$: Observable<string[]> = merge(
-        this.clearSuggestions$$,
+        this.refreshSuggestionsSignals$,
         this.suggestions$
     );
-
-    clearInput = (event: Event) => {
-        event.preventDefault();
-        if (this.inputRef === undefined) return;
-
-        this.inputRef.nativeElement.value = "";
-    };
 
     ngAfterViewInit(): void {
         if (this.inputRef !== undefined) {
