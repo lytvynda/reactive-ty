@@ -70,40 +70,67 @@
     }
 
     .clear-button .fa-solid:hover {
-      transition-delay: .1s;
+      transition-delay: .05s;
       -ms-transform: scale(1.5);
       -webkit-transform: scale(1.5);
       transform: scale(1.5);
     }
   }
+
+  .progress-bar {
+    height: 4px;
+    background-color: rgba(5, 114, 206, 0.2);
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .progress-bar-value {
+    width: 100%;
+    height: 100%;
+    background-color: rgb(5, 114, 206);
+    animation: indeterminateAnimation .7s infinite linear;
+    transform-origin: 0 50%;
+  }
+
+  .result-box {
+    max-height: 40vh;
+    overflow-y: scroll;
+  }
+
+  .result-box ul {
+    border-top: 1px solid #999;
+    padding: 15px 10px;
+  }
+
+  .result-box ul:empty {
+    padding: 0;
+  }
+
+  .result-box ul li {
+    list-style: none;
+    border-radius: 3px;
+    padding: 15px 10px;
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .result-box ul li:hover {
+    background: #e9f3ff;
+  }
 }
 
-.result-box {
-  max-height: 40vh;
-  overflow-y: scroll;
-}
-
-.result-box ul {
-  border-top: 1px solid #999;
-  padding: 15px 10px;
-}
-
-.result-box ul:empty {
-  padding: 0;
-}
-
-.result-box ul li {
-  list-style: none;
-  border-radius: 3px;
-  padding: 15px 10px;
-  cursor: pointer;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.result-box ul li:hover {
-  background: #e9f3ff;
+@keyframes indeterminateAnimation {
+  0% {
+    transform:  translateX(0) scaleX(0);
+  }
+  40% {
+    transform:  translateX(0) scaleX(0.4);
+  }
+  100% {
+    transform:  translateX(100%) scaleX(0.5);
+  }
 }
 
 @media (max-width: 700px) {

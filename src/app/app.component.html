@@ -5,9 +5,31 @@
     <button class="clear-button" #clearBtn><i [ngClass]="['fa-solid', 'fa-close']"></i></button>
   </div>
 
-  <div class="result-box">
-    <ul>
-      <li *ngFor="let suggestion of result$ | async">{{ suggestion }}</li>
-    </ul>
-  </div>
+  <ng-container *ngIf="{
+    results: displayResults$ | async,
+    searchStatus: searchStatus$ | async,
+    inputValue: inputValueTrimmed$ | async,
+  } as data;">
+
+    <!--display loading until we have suggestions-->
+    <div *ngIf="data.searchStatus?.status === 'loading'; else suggestions">
+      <div class="progress-bar">
+        <div class="progress-bar-value"></div>
+      </div>
+    </div>
+
+  <!--display suggestions-->
+    <ng-template #suggestions>
+      <div class="result-box">
+        <ul>
+          <li *ngFor="let suggestion of data.results">{{ suggestion }}</li>
+        </ul>
+      </div>
+    </ng-template>
+    <ng-template [ngIf]="shouldDisplayNoResults(data.searchStatus, data.inputValue)"
+    >
+      Not found
+    </ng-template>
+  </ng-container>
+
 </form>
