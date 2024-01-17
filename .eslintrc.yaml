@@ -30,10 +30,6 @@ overrides:
       no-var: warn
       camelcase: error
       eqeqeq: [error, always]
-      capitalized-comments:
-        - warn
-        - always
-        - ignoreConsecutiveComments: true
       curly: [error, multi-line, consistent]
   - files:
       - "*.html"
