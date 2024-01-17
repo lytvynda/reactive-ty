@@ -10,7 +10,7 @@
   overflow: hidden;
   position: relative;
   background: white;
-  margin: 200px auto 0;
+  margin: 400px auto 0;
   border-radius: 5px;
 
   .row {
@@ -118,6 +118,11 @@
 
   .result-box ul li:hover {
     background: #e9f3ff;
+  }
+
+  .no-results {
+    background-color: #ffc4c4;
+    padding: 16px;
   }
 }
 

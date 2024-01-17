@@ -10,15 +10,13 @@
     searchStatus: searchStatus$ | async,
     inputValue: inputValueTrimmed$ | async,
   } as data;">
-
     <!--display loading until we have suggestions-->
     <div *ngIf="data.searchStatus?.status === 'loading'; else suggestions">
       <div class="progress-bar">
         <div class="progress-bar-value"></div>
       </div>
     </div>
-
-  <!--display suggestions-->
+    <!--display suggestions-->
     <ng-template #suggestions>
       <div class="result-box">
         <ul>
@@ -26,9 +24,10 @@
         </ul>
       </div>
     </ng-template>
-    <ng-template [ngIf]="shouldDisplayNoResults(data.searchStatus, data.inputValue)"
-    >
-      Not found
+    <ng-template [ngIf]="shouldDisplayNoResults(data.searchStatus, data.inputValue)">
+      <div class="no-results">
+        <span>Nothing found ˙◠˙</span>
+      </div>
     </ng-template>
   </ng-container>
 

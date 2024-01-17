@@ -2,9 +2,8 @@
   "name": "typeahead-rxjs",
   "version": "0.0.0",
   "scripts": {
-    "start": "ng serve --watch --live-reload --open --ssl --ssl-cert './config/certs/server.crt' --ssl-key './config/certs/server.key'",
+    "start": "ng serve --watch --live-reload --open --configuration development --ssl --ssl-cert './config/certs/server.crt' --ssl-key './config/certs/server.key'",
     "build": "ng build",
-    "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "lint": "ng lint"
   },

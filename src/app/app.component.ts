@@ -12,6 +12,7 @@ import {
     Subject,
     fromEvent,
     takeUntil,
+    shareReplay,
     switchMap,
     map,
     merge,
@@ -40,12 +41,7 @@ export class AppComponent implements AfterViewInit, OnDestroy {
     private destroy$: ReplaySubject<null> = new ReplaySubject<null>();
 
     clearInput$: Observable<MouseEvent> = this.clearButtonClick$.pipe(
-        tap(() => {
-            if (this.inputRef === undefined) return;
-            const inputElement = this.inputRef.nativeElement;
-            inputElement.value = "";
-            inputElement.dispatchEvent(new Event("paste"));
-        })
+        tap((_) => this.setInputValue(""))
     );
 
     backspaceKeyup$: Observable<KeyboardEvent> = this.inputChanges$.pipe(
@@ -71,7 +67,7 @@ export class AppComponent implements AfterViewInit, OnDestroy {
     suggestions$: Observable<Array<string>> = this.searchStatus$.pipe(
         map(
             (statusReport: ProclaimedStatus<Array<string>>): Array<string> =>
-                statusReport.status !== "resolved" ? [] : statusReport.value
+                statusReport.status === "resolved" ? statusReport.value : []
         )
     );
 
@@ -94,6 +90,18 @@ export class AppComponent implements AfterViewInit, OnDestroy {
         const resultsLength = isResolved ? status.value.length : 0;
 
         return isResolved && !inputIsEmpty && resultsLength === 0;
+    };
+
+    setInputValue = (newValue: string): void => {
+        if (this.inputRef === undefined) {
+            console.debug("Input ref is undefined, couldn't set new value");
+            return;
+        }
+
+        const inputElement = this.inputRef.nativeElement;
+        inputElement.value = newValue;
+        // Dispatch Event programmatically, so we could handle it using fromEvent listeners
+        inputElement.dispatchEvent(new Event("paste"));
     };
 
     ngAfterViewInit(): void {
