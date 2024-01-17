@@ -51,7 +51,11 @@ export class AppComponent implements AfterViewInit, OnDestroy {
     inputValueTrimmed$: Observable<string> = this.inputChanges$.pipe(
         map((event: KeyboardEvent) =>
             (event.target as HTMLInputElement).value.trim()
-        )
+        ),
+        shareReplay({
+            bufferSize: 1,
+            refCount: false,
+        })
     );
 
     searchStatus$: Observable<ProclaimedStatus<Array<string>>> =
@@ -60,8 +64,12 @@ export class AppComponent implements AfterViewInit, OnDestroy {
             distinctUntilChanged(),
             filter(Boolean),
             switchMap((query: string) =>
-                withStatusProclaim(of([query]).pipe(delay(1000)))
-            )
+                of([]).pipe(delay(1000), withStatusProclaim)
+            ),
+            shareReplay({
+                bufferSize: 1,
+                refCount: false,
+            })
         );
 
     suggestions$: Observable<Array<string>> = this.searchStatus$.pipe(
