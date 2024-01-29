@@ -6,8 +6,8 @@
   </div>
 
   <ng-container *ngIf="{
-    results: displayResults$ | async,
-    searchStatus: searchStatus$ | async,
+    results: searchResult$ | async,
+    searchStatus: searchResponse$ | async,
     inputValue: inputValueTrimmed$ | async,
   } as data;">
     <!--display loading until we have suggestions-->
@@ -20,7 +20,11 @@
     <ng-template #suggestions>
       <div class="result-box">
         <ul>
-          <li *ngFor="let suggestion of data.results">{{ suggestion }}</li>
+          <li *ngFor="let suggestion of data.results; index as idx"
+              [tabindex]="idx"
+              (click)="redirectBySelectedItem(idx, data.results || [])"
+              #listItem
+          >{{ suggestion }}</li>
         </ul>
       </div>
     </ng-template>

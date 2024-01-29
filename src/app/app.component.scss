@@ -99,7 +99,7 @@
 
   .result-box ul {
     border-top: 1px solid #999;
-    padding: 15px 10px;
+    padding: 10px;
   }
 
   .result-box ul:empty {
@@ -110,14 +110,40 @@
     list-style: none;
     border-radius: 3px;
     padding: 15px 10px;
+    margin-bottom: 5px;
+    position: relative;
+    outline: none;
     cursor: pointer;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    border: none;
+  }
+
+  .result-box ul li::after {
+    content: '↵';
+    padding: 5px 10px;
+    border-radius: 15%;
+    box-shadow: 3px 3px 10px 1px rgba(0,0,0,0.1);
+    background: #f3f4f5;
+    position: absolute;
+    right: 5%;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0;
+  }
+
+  .result-box ul li:focus::after {
+    opacity: 1;
   }
 
   .result-box ul li:hover {
     background: #e9f3ff;
+  }
+
+  .result-box ul li:focus {
+    background: #adc8ed;
+    border: none;
   }
 
   .no-results {
