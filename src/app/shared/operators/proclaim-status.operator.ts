@@ -1,4 +1,4 @@
-import { catchError, concat, map, Observable, of } from "rxjs";
+import { catchError, map, Observable, of, startWith } from "rxjs";
 
 type LoadingStatus = {
     status: "loading";
@@ -26,14 +26,13 @@ type ProclaimedStatus<T> = LoadingStatus | ResolvedStatus<T> | ErrorStatus;
 function withStatusProclaim<T>(
     observable: Observable<T>
 ): Observable<ProclaimedStatus<T>> {
-    const initial: Observable<LoadingStatus> = of({ status: "loading" });
-    const wrapped: Observable<ProclaimedStatus<T>> = observable.pipe(
+    return observable.pipe(
         map((value: T) => ({ status: "resolved", value }) as ResolvedStatus<T>),
+        startWith({ status: "loading" } as LoadingStatus),
         catchError((error: Error) =>
             of({ status: "error", error } as ErrorStatus)
         )
     );
-    return concat(initial, wrapped);
 }
 
 export { withStatusProclaim };
