@@ -10,29 +10,33 @@
     searchStatus: searchResponse$ | async,
     inputValue: inputValueTrimmed$ | async,
   } as data;">
+    @if (data.searchStatus?.status === 'loading') {
     <!--display loading until we have suggestions-->
-    <div *ngIf="data.searchStatus?.status === 'loading'; else suggestions">
       <div class="progress-bar">
         <div class="progress-bar-value"></div>
       </div>
-    </div>
+    } @else {
     <!--display suggestions-->
-    <ng-template #suggestions>
       <div class="result-box">
         <ul>
-          <li *ngFor="let suggestion of data.results; index as idx"
-              [tabindex]="idx"
-              (click)="redirectBySelectedItem(idx, data.results || [])"
-              #listItem
-          >{{ suggestion }}</li>
+          @for (suggestion of data.results; track suggestion;
+          let idx = $index) {
+            <li
+            [tabIndex]="idx"
+            (click)="redirectBySelectedItem(idx, data.results || [])"
+            #listItem
+            >
+              {{ suggestion }}
+            </li>
+          }
         </ul>
       </div>
-    </ng-template>
-    <ng-template [ngIf]="shouldDisplayNoResults(data.searchStatus, data.inputValue)">
+    }
+    @if (shouldDisplayNoResults(data.searchStatus, data.inputValue)) {
       <div class="no-results">
         <span>Nothing found ˙◠˙</span>
       </div>
-    </ng-template>
+    }
   </ng-container>
 
 </form>
