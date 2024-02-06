@@ -11,6 +11,14 @@ import {
 } from "@angular/core";
 import { DOCUMENT } from "@angular/common";
 import {
+    style,
+    stagger,
+    trigger,
+    transition,
+    animate,
+    query,
+} from "@angular/animations";
+import {
     BehaviorSubject,
     debounceTime,
     delay,
@@ -51,10 +59,29 @@ function mod(n: number, m: number): number {
     return ((n % m) + m) % m;
 }
 
+const listAnimation = trigger("listAnimation", [
+    transition(":enter", [
+        query(
+            ".listItem",
+            [
+                style({ opacity: 0, transform: "translateY(-150px)" }),
+                stagger(30, [
+                    animate(
+                        "300ms cubic-bezier(0.35, 0, 0.25, 1)",
+                        style({ opacity: 1, transform: "none" })
+                    ),
+                ]),
+            ],
+            { optional: true }
+        ),
+    ]),
+]);
+
 @Component({
     selector: "app-root",
     templateUrl: "./app.component.html",
     styleUrls: ["./app.component.scss"],
+    animations: [listAnimation],
 })
 export class AppComponent implements AfterViewInit, OnDestroy, OnInit {
     // Begin counting from -1 instead of 0 to ensure that
@@ -156,14 +183,14 @@ export class AppComponent implements AfterViewInit, OnDestroy, OnInit {
     };
 
     shouldDisplayNoResults = (
-        status: ProclaimedStatus<Array<unknown>> | null,
+        response: ProclaimedStatus<Array<unknown>> | null,
         inputValue: string | null
     ): boolean => {
-        const isResolved = status?.status === "resolved";
+        const isResolved = response?.status === "resolved";
         const inputIsEmpty = (inputValue?.length ?? 0) === 0;
-        const resultsLength = isResolved ? status.value.length : 0;
+        const responseLength = isResolved ? response.value.length : 0;
 
-        return isResolved && !inputIsEmpty && resultsLength === 0;
+        return isResolved && !inputIsEmpty && responseLength === 0;
     };
 
     isUserFocusedOnListItem = (): boolean => {

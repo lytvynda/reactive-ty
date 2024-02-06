@@ -9,7 +9,7 @@
   width: 600px;
   overflow: hidden;
   position: relative;
-  background: white;
+  background: transparent;
   margin: 400px auto 0;
   border-radius: 5px;
 
@@ -17,6 +17,7 @@
     display: flex;
     align-items: center;
     padding: 10px 20px;
+    background-color: white;
 
     .screen-reader-text {
       position: absolute;
@@ -95,11 +96,12 @@
   .result-box {
     max-height: 40vh;
     overflow-y: scroll;
+    background: transparent;
   }
 
   .result-box ul {
     border-top: 1px solid #999;
-    padding: 10px;
+    background: transparent;
   }
 
   .result-box ul:empty {
@@ -108,9 +110,8 @@
 
   .result-box ul li {
     list-style: none;
-    border-radius: 3px;
+    background-color: white;
     padding: 15px 10px;
-    margin-bottom: 5px;
     position: relative;
     outline: none;
     cursor: pointer;
@@ -146,7 +147,11 @@
     border: none;
   }
 
-  .no-results {
+  .result-box ul li i {
+    margin-right: 10px;
+  }
+
+  .no-results, .request-error {
     background-color: #ffc4c4;
     padding: 16px;
   }
