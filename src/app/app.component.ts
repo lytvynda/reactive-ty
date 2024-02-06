@@ -3,7 +3,6 @@ import {
     Component,
     ElementRef,
     Inject,
-    OnDestroy,
     OnInit,
     QueryList,
     ViewChild,
@@ -34,11 +33,11 @@ import {
     shareReplay,
     Subject,
     switchMap,
-    takeUntil,
     tap,
     withLatestFrom,
 } from "rxjs";
-import { ProclaimedStatus, withStatusProclaim } from "./shared/operators";
+import type { ProclaimedStatus } from "./shared/operators";
+import { untilDestroyed, withStatusProclaim } from "./shared/operators";
 
 enum ArrowKeyDirection {
     Up = -1,
@@ -83,7 +82,7 @@ const listAnimation = trigger("listAnimation", [
     styleUrls: ["./app.component.scss"],
     animations: [listAnimation],
 })
-export class AppComponent implements AfterViewInit, OnDestroy, OnInit {
+export class AppComponent implements AfterViewInit, OnInit {
     // Begin counting from -1 instead of 0 to ensure that
     // we end up at index 0 by first forward navigation.
     readonly startListIndex: number = -1;
@@ -104,7 +103,7 @@ export class AppComponent implements AfterViewInit, OnDestroy, OnInit {
     activeListItemIndex$: BehaviorSubject<number> = new BehaviorSubject(
         this.startListIndex
     );
-    private destroy$: ReplaySubject<null> = new ReplaySubject();
+    private untilDestroyed = untilDestroyed();
 
     constructor(@Inject(DOCUMENT) private document: Document) {}
 
@@ -294,35 +293,26 @@ export class AppComponent implements AfterViewInit, OnDestroy, OnInit {
                 fromEvent<KeyboardEvent>(this.inputRef.nativeElement, "keyup"),
                 fromEvent<KeyboardEvent>(this.inputRef.nativeElement, "paste")
             )
-                .pipe(takeUntil(this.destroy$))
+                .pipe(this.untilDestroyed())
                 .subscribe(this.inputChange$);
         }
 
         if (this.clearBtnRef !== undefined) {
             fromEvent<MouseEvent>(this.clearBtnRef.nativeElement, "click")
-                .pipe(takeUntil(this.destroy$))
+                .pipe(this.untilDestroyed())
                 .subscribe(this.clearButtonClick$);
         }
 
         fromEvent<KeyboardEvent>(this.document, "keydown")
-            .pipe(takeUntil(this.destroy$))
+            .pipe(this.untilDestroyed())
             .subscribe(this.hostKeydown$);
     }
 
     ngOnInit() {
-        const terminationPipe = pipe(takeUntil(this.destroy$));
-
         [
             this.listNavigation$,
             this.setInputFocus$,
             this.handleUserChoice$,
-        ].forEach((o) => o.pipe(terminationPipe).subscribe());
-    }
-
-    ngOnDestroy(): void {
-        if (this.destroy$) {
-            this.destroy$.next(null);
-            this.destroy$.complete();
-        }
+        ].forEach((o) => o.pipe(this.untilDestroyed()).subscribe());
     }
 }
