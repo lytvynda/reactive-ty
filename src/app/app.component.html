@@ -1,8 +1,8 @@
 <form action="#" method="GET" class="search-form">
   <div class="row">
-    <input id="search" class="search-input" #inputBox type="search" placeholder="News topic" autocomplete="off">
+    <input id="search" class="search-input" type="search" placeholder="News topic" autocomplete="off" #inputBox>
     <label for="search" class="screen-reader-text">News topic</label>
-    <button class="clear-button" #clearBtn><i [ngClass]="['fa-solid', 'fa-close']"></i></button>
+    <button class="clear-button" #clearBtn><i class="fa-solid fa-close"></i></button>
   </div>
 
   <ng-container *ngIf="{
@@ -14,13 +14,13 @@
     <div class="progress-bar">
       <div class="progress-bar-value"></div>
     </div>
-    } @else if (shouldDisplayNoResults(data.searchStatus, data.inputValue)) {
-    <div class="no-results">
-      <span>Nothing found ˙◠˙</span>
-    </div>
     } @else if (data.searchStatus?.status === 'error') {
     <div class="request-error">
       <span>Sorry, we couldn't load news topics</span>
+    </div>
+    } @else if (shouldDisplayNoResults(data.searchStatus, data.inputValue)) {
+    <div class="no-results">
+      <span>Nothing found ˙◠˙</span>
     </div>
     } @else {
     <div class="result-box">

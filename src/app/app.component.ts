@@ -28,8 +28,6 @@ import {
     merge,
     Observable,
     of,
-    pipe,
-    ReplaySubject,
     shareReplay,
     Subject,
     switchMap,
@@ -83,10 +81,6 @@ const listAnimation = trigger("listAnimation", [
     animations: [listAnimation],
 })
 export class AppComponent implements AfterViewInit, OnInit {
-    // Begin counting from -1 instead of 0 to ensure that
-    // we end up at index 0 by first forward navigation.
-    readonly startListIndex: number = -1;
-
     @ViewChild("inputBox", { static: true })
     inputRef: ElementRef | undefined;
 
@@ -99,37 +93,36 @@ export class AppComponent implements AfterViewInit, OnInit {
     inputChange$: Subject<KeyboardEvent | ClipboardEvent> = new Subject();
     hostKeydown$: Subject<KeyboardEvent> = new Subject();
     clearButtonClick$: Subject<MouseEvent> = new Subject();
-
-    activeListItemIndex$: BehaviorSubject<number> = new BehaviorSubject(
-        this.startListIndex
-    );
+    // Should be positive number in range of [0, listLength],
+    // inclusive
+    activeListItemIndex$: BehaviorSubject<number> = new BehaviorSubject(0);
     private untilDestroyed = untilDestroyed();
 
     constructor(@Inject(DOCUMENT) private document: Document) {}
 
-    nextListIndexToSelect = ([direction, currentSelectedIndex]: [
+    getNextListIndex = ([direction, currentSelectedIndex]: [
         number,
         number,
     ]): number => {
         const listItems: ElementRef[] | undefined =
             this.resultListItems?.toArray();
         const listLength: number = listItems ? listItems.length : 0;
+        const nextPresumedValue = currentSelectedIndex + direction;
 
-        if (direction === ArrowKeyDirection.Up) {
-            return currentSelectedIndex <= 0
-                ? listLength + direction
-                : currentSelectedIndex + direction;
-        }
-
-        return mod(currentSelectedIndex + direction, listLength);
+        return mod(nextPresumedValue, listLength + 1);
     };
 
-    setFocusOnListItem = (index: number): void => {
+    selectListItem = ([index, lastTypedInputValue]: [number, string]): void => {
+        const inputElement = this.inputRef?.nativeElement;
         const listItems: ElementRef[] | undefined =
             this.resultListItems?.toArray();
 
         if (listItems?.[index]) {
             listItems[index].nativeElement.focus();
+            inputElement.value = listItems[index].nativeElement.innerText;
+        } else {
+            inputElement.focus(); // just to remove focus from LI
+            inputElement.value = lastTypedInputValue;
         }
     };
 
@@ -259,16 +252,17 @@ export class AppComponent implements AfterViewInit, OnInit {
                     statusReport.status === "resolved" ? statusReport.value : []
             )
         )
-    ).pipe(tap((_) => this.activeListItemIndex$.next(this.startListIndex)));
+    ).pipe(tap((_) => this.activeListItemIndex$.next(_.length)));
 
     listNavigation$: Observable<unknown> = merge(
         this.documentArrowDown$,
         this.documentArrowUp$
     ).pipe(
         withLatestFrom(this.activeListItemIndex$),
-        map(this.nextListIndexToSelect),
-        tap(this.setFocusOnListItem),
-        tap((newIndex) => this.activeListItemIndex$.next(newIndex))
+        map(this.getNextListIndex),
+        tap((newIndex) => this.activeListItemIndex$.next(newIndex)),
+        withLatestFrom(this.inputValueTrimmed$),
+        tap(this.selectListItem)
     );
 
     setInputFocus$: Observable<unknown> = this.hostKeydown$.pipe(
