@@ -59,7 +59,7 @@ function mod(n: number, m: number): number {
 const listAnimation = trigger("listAnimation", [
     transition(":enter", [
         query(
-            ".listItem",
+            ".js-list-item",
             [
                 style({ opacity: 0, transform: "translateY(-150px)" }),
                 stagger(30, [

@@ -2,8 +2,8 @@
 
 <form action="#" method="GET" class="search-form">
   <div class="row">
-    <input id="search" class="search-input" type="search" placeholder="News topic" autocomplete="off" #inputBox>
-    <label for="search" class="screen-reader-text">Search for news</label>
+    <input id="input-search" class="search-form__input" type="search" placeholder="News topic" autocomplete="off" #inputBox>
+    <label for="input-search" class="search-form__input-label">Search for news</label>
     <button class="clear-button" #clearBtn><i class="fa-solid fa-close"></i></button>
   </div>
 
@@ -13,23 +13,23 @@
     inputValue: inputValueTrimmed$ | async,
   } as data;">
     @if (data.searchStatus?.status === 'loading') {
-    <div class="progress-bar">
-      <div class="progress-bar-value"></div>
+    <div class="search-form__progress-bar">
+      <div class="search-form__progress-bar-value"></div>
     </div>
     } @else if (data.searchStatus?.status === 'error') {
-    <div class="request-error">
+    <div class="search-form__error">
       <span>Sorry, we couldn't load news topics</span>
     </div>
     } @else if (shouldDisplayNoResults(data.searchStatus, data.inputValue)) {
-    <div class="no-results">
+    <div class="search-form__no-results">
       <span>Nothing found ˙◠˙</span>
     </div>
     } @else {
-    <div class="result-box">
+    <div class="search-form__search-result">
       <ul [@listAnimation]="data.results?.length">
         @for (suggestion of data.results; track suggestion;
         let idx = $index) {
-        <li class="listItem" [tabIndex]="idx" (click)="redirectBySelectedItem(idx, data.results || [])" #listItem>
+        <li class="js-list-item" [tabIndex]="idx" (click)="redirectBySelectedItem(idx, data.results || [])" #listItem>
           <i class="fa-regular fa-newspaper"></i>
           {{ suggestion }}
         </li>
