@@ -120,7 +120,7 @@ export class HomePage implements AfterViewInit, OnInit {
             listItems[index].nativeElement.focus();
             inputElement.value = listItems[index].nativeElement.innerText;
         } else {
-            inputElement.focus(); // just to remove focus from LI
+            inputElement.focus(); // to remove focus from LI
             inputElement.value = lastTypedInputValue;
         }
     };
@@ -167,10 +167,20 @@ export class HomePage implements AfterViewInit, OnInit {
         // or event itself. Therefore, we use the Clipboard API.
         if (event.type === "paste") {
             const clipboardData = (event as ClipboardEvent).clipboardData;
-            return clipboardData?.getData("text/plain")?.trim() ?? "";
+            const inputValueFromClipboard =
+                clipboardData?.getData("text/plain");
+
+            // Duck tape alert: We assume that the paste event could
+            // originate programmatically, thus one potential source
+            // of the value could be Session Storage.
+            return (
+                inputValueFromClipboard ??
+                this.getQueryFromSessionStorage() ??
+                ""
+            );
         }
 
-        return (event.target as HTMLInputElement).value.trim();
+        return (event.target as HTMLInputElement).value;
     };
 
     shouldDisplayNoResults = (
@@ -186,6 +196,16 @@ export class HomePage implements AfterViewInit, OnInit {
 
     isUserFocusedOnListItem = (): boolean => {
         return this.document.activeElement?.tagName === "LI";
+    };
+
+    saveQueryToSessionStorage = (value: string): void => {
+        sessionStorage.setItem(`${this.constructor.name}_searchQuery`, value);
+    };
+
+    getQueryFromSessionStorage = (): string => {
+        return (
+            sessionStorage.getItem(`${this.constructor.name}_searchQuery`) ?? ""
+        );
     };
 
     clearInput$: Observable<MouseEvent> = this.clearButtonClick$.pipe(
@@ -217,6 +237,7 @@ export class HomePage implements AfterViewInit, OnInit {
 
     inputValueTrimmed$: Observable<string> = this.inputChange$.pipe(
         map(this.getInputValueFromEvent),
+        map((value) => value.trim()),
         shareReplay({ bufferSize: 1, refCount: false })
     );
 
@@ -224,8 +245,9 @@ export class HomePage implements AfterViewInit, OnInit {
         this.inputValueTrimmed$.pipe(
             debounceTime(300),
             distinctUntilChanged(),
+            tap(this.saveQueryToSessionStorage),
             filter(Boolean),
-            switchMap((query: string) =>
+            switchMap((query) =>
                 of(["one", "two", "three"]).pipe(delay(200), withStatusProclaim)
             ),
             shareReplay({
@@ -286,6 +308,10 @@ export class HomePage implements AfterViewInit, OnInit {
             )
                 .pipe(this.untilDestroyed())
                 .subscribe(this.inputChange$);
+
+            queueMicrotask(() =>
+                this.setInputValue(this.getQueryFromSessionStorage())
+            );
         }
 
         if (this.clearBtnRef !== undefined) {
