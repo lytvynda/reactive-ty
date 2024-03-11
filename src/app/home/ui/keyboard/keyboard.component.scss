@@ -1,0 +1,64 @@
+.keyboard {
+    position: fixed;
+    display: flex;
+    flex-direction: column;
+    left: 90%;
+    top: 20%;
+    transform: translate(-70%, -20%) rotate(-20deg);
+    font-size: max(15px, calc(100vw / 70));
+
+    .keyboard__row {
+        display: flex;
+        flex-direction: row;
+        height: 3em;
+        margin: 0.2em;
+
+        .keyboard__key {
+            opacity: 0.2;
+            background: #333;
+            float: left;
+            border-radius: 0.3em;
+            margin: 0.2em;
+            padding: 0.2em;
+            width: 3.3em;
+            height: 100%;
+            box-sizing: border-box;
+            border: 1px solid #444;
+            box-shadow: 0 0.2em 0 0.05em #222;
+            border-bottom-color: #555;
+        }
+
+        .keyboard__key[data-pressed] {
+            background: #2a2a2a;
+            position: relative;
+            top: 0.2em;
+            box-shadow: 0 0 0 0.05em black;
+        }
+
+        .keyboard__key--space {
+            width: 18.2em;
+        }
+
+        .keyboard__key--backspace, .keyboard__key--tab {
+            width: 6em;
+        }
+
+        .keyboard__key--capslock, .keyboard__key--enter {
+            width: 6.5em;
+        }
+
+        .keyboard__key--shiftleft, .keyboard__key--shiftright {
+            width: 8.3em;
+        }
+
+        .keyboard__key--controlleft, 
+        .keyboard__key--controlright, 
+        .keyboard__key--altleft, 
+        .keyboard__key--altright,
+        .keyboard__key--metaleft,
+        .keyboard__key--contextmenu, 
+        .keyboard__key--fn {
+            width: 4.7em;
+        }
+    }
+}
