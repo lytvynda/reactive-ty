@@ -1,13 +1,12 @@
 import {
-    AfterViewInit,
     Component,
     ElementRef,
     Inject,
     OnInit,
-    QueryList,
-    ViewChild,
-    ViewChildren,
+    viewChild,
+    viewChildren,
 } from "@angular/core";
+import { toObservable } from "@angular/core/rxjs-interop";
 import { DOCUMENT } from "@angular/common";
 import {
     style,
@@ -80,43 +79,56 @@ const listAnimation = trigger("listAnimation", [
     styleUrls: ["./home.page.scss"],
     animations: [listAnimation],
 })
-export class HomePage implements AfterViewInit, OnInit {
-    @ViewChild("inputBox", { static: true })
-    inputRef: ElementRef | undefined;
+export class HomePage implements OnInit {
+    untilDestroyed = untilDestroyed();
+    shareReplayConfig = { bufferSize: 1, refCount: false };
 
-    @ViewChild("clearBtn", { static: true })
-    clearBtnRef: ElementRef | undefined;
-
-    @ViewChildren("listItem")
-    resultListItems: QueryList<ElementRef> | undefined;
-
-    inputChange$: Subject<KeyboardEvent | ClipboardEvent> = new Subject();
     hostKeydown$: Subject<KeyboardEvent> = new Subject();
-    clearButtonClick$: Subject<MouseEvent> = new Subject();
-    // Should be positive number in range of [0, listLength], inclusive
-    activeListItemIndex$: BehaviorSubject<number> = new BehaviorSubject(0);
-    private untilDestroyed = untilDestroyed();
+    activeListItemIndex$: BehaviorSubject<number> = new BehaviorSubject(0); // (0, listLength]
+
+    inputElement = viewChild.required<ElementRef<HTMLInputElement>>("inputRef");
+    clearBtnElement =
+        viewChild.required<ElementRef<HTMLButtonElement>>("clearBtnRef");
+    listItemElements = viewChildren<ElementRef<HTMLLIElement>>("listItemRef");
 
     constructor(@Inject(DOCUMENT) private document: Document) {}
 
-    getNextListIndex = ([direction, currentSelectedIndex]: [
+    inputElement$ = toObservable(this.inputElement);
+    clearBtnElement$ = toObservable(this.clearBtnElement);
+    listItemElements$ = toObservable(this.listItemElements);
+
+    inputChange$ = this.inputElement$.pipe(
+        switchMap(({ nativeElement }) =>
+            merge(
+                fromEvent<KeyboardEvent>(nativeElement, "keyup"),
+                fromEvent<KeyboardEvent>(nativeElement, "paste")
+            )
+        ),
+        shareReplay(this.shareReplayConfig)
+    );
+
+    clearButtonClick$ = this.clearBtnElement$.pipe(
+        switchMap(({ nativeElement }) =>
+            fromEvent<MouseEvent>(nativeElement, "click")
+        ),
+        shareReplay(this.shareReplayConfig)
+    );
+
+    getNextListIndexToSelect = ([direction, currentSelectedIndex]: [
         number,
         number,
     ]): number => {
-        const listItems: ElementRef[] | undefined =
-            this.resultListItems?.toArray();
-        const listLength: number = listItems ? listItems.length : 0;
+        const listItems = this.listItemElements();
         const nextPresumedValue = currentSelectedIndex + direction;
 
-        return mod(nextPresumedValue, listLength + 1);
+        return mod(nextPresumedValue, listItems.length + 1);
     };
 
     selectListItem = ([index, lastTypedInputValue]: [number, string]): void => {
-        const inputElement = this.inputRef?.nativeElement;
-        const listItems: ElementRef[] | undefined =
-            this.resultListItems?.toArray();
+        const inputElement = this.inputElement().nativeElement;
+        const listItems = this.listItemElements();
 
-        if (listItems?.[index]) {
+        if (listItems[index]) {
             listItems[index].nativeElement.focus();
             inputElement.value = listItems[index].nativeElement.innerText;
         } else {
@@ -126,14 +138,10 @@ export class HomePage implements AfterViewInit, OnInit {
     };
 
     setInputValue = (newValue: string): void => {
-        if (this.inputRef === undefined) {
-            console.debug("Input ref is undefined, couldn't set new value");
-            return;
-        }
-
-        const inputElement = this.inputRef.nativeElement;
+        const inputElement = this.inputElement().nativeElement;
         inputElement.value = newValue;
-        // Dispatch Event programmatically, so we could handle it using fromEvent listeners
+        // Dispatch  Event programmatically, so  we
+        // could handle it using fromEvent listeners
         inputElement.dispatchEvent(new Event("paste"));
     };
 
@@ -278,7 +286,7 @@ export class HomePage implements AfterViewInit, OnInit {
         this.documentArrowUp$
     ).pipe(
         withLatestFrom(this.activeListItemIndex$),
-        map(this.getNextListIndex),
+        map(this.getNextListIndexToSelect),
         tap((newIndex) => this.activeListItemIndex$.next(newIndex)),
         withLatestFrom(this.inputValueTrimmed$),
         tap(this.selectListItem)
@@ -289,7 +297,7 @@ export class HomePage implements AfterViewInit, OnInit {
         filter(
             (event) => !["ArrowDown", "ArrowUp", "Enter"].includes(event.key)
         ),
-        tap(() => this.inputRef?.nativeElement?.focus())
+        tap(() => this.inputElement().nativeElement.focus())
     );
 
     handleUserChoice$: Observable<unknown> = this.documentEnter$.pipe(
@@ -300,32 +308,17 @@ export class HomePage implements AfterViewInit, OnInit {
         })
     );
 
-    ngAfterViewInit(): void {
-        if (this.inputRef !== undefined) {
-            merge(
-                fromEvent<KeyboardEvent>(this.inputRef.nativeElement, "keyup"),
-                fromEvent<KeyboardEvent>(this.inputRef.nativeElement, "paste")
-            )
-                .pipe(this.untilDestroyed())
-                .subscribe(this.inputChange$);
-
-            queueMicrotask(() =>
-                this.setInputValue(this.getQueryFromSessionStorage())
-            );
-        }
-
-        if (this.clearBtnRef !== undefined) {
-            fromEvent<MouseEvent>(this.clearBtnRef.nativeElement, "click")
-                .pipe(this.untilDestroyed())
-                .subscribe(this.clearButtonClick$);
-        }
+    ngOnInit() {
+        queueMicrotask(() =>
+            // Update view in Microtask queue, so Angular would't be angry
+            // about changing value after it was checked
+            this.setInputValue(this.getQueryFromSessionStorage())
+        );
 
         fromEvent<KeyboardEvent>(this.document, "keydown")
             .pipe(this.untilDestroyed())
             .subscribe(this.hostKeydown$);
-    }
 
-    ngOnInit() {
         [
             this.listNavigation$,
             this.setInputFocus$,

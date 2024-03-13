@@ -2,9 +2,10 @@
 
 <form action="#" method="GET" class="search-form">
   <div class="row">
-    <input id="input-search" class="search-form__input" type="search" placeholder="News topic" autocomplete="off" #inputBox>
+    <input id="input-search" class="search-form__input" type="search" placeholder="News topic" autocomplete="off"
+      #inputRef>
     <label for="input-search" class="search-form__input-label">Search for news</label>
-    <button class="clear-button" #clearBtn><i class="fa-solid fa-close"></i></button>
+    <button class="clear-button" #clearBtnRef><i class="fa-solid fa-close"></i></button>
   </div>
 
   <ng-container *ngIf="{
@@ -29,7 +30,8 @@
       <ul [@listAnimation]="data.results?.length">
         @for (suggestion of data.results; track suggestion;
         let idx = $index) {
-        <li class="js-list-item" [tabIndex]="idx" (click)="redirectBySelectedItem(idx, data.results || [])" #listItem>
+        <li class="js-list-item" [tabIndex]="idx" (click)="redirectBySelectedItem(idx, data.results || [])"
+          #listItemRef>
           <i class="fa-regular fa-newspaper"></i>
           {{ suggestion }}
         </li>
