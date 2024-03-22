@@ -1,8 +1,11 @@
 import {
+    AfterViewInit,
     Component,
     ElementRef,
     Inject,
     OnInit,
+    WritableSignal,
+    signal,
     viewChild,
     viewChildren,
 } from "@angular/core";
@@ -17,7 +20,6 @@ import {
     query,
 } from "@angular/animations";
 import {
-    BehaviorSubject,
     debounceTime,
     delay,
     distinctUntilChanged,
@@ -79,12 +81,12 @@ const listAnimation = trigger("listAnimation", [
     styleUrls: ["./home.page.scss"],
     animations: [listAnimation],
 })
-export class HomePage implements OnInit {
+export class HomePage implements OnInit, AfterViewInit {
     untilDestroyed = untilDestroyed();
     shareReplayConfig = { bufferSize: 1, refCount: false };
 
     hostKeydown$: Subject<KeyboardEvent> = new Subject();
-    activeListItemIndex$: BehaviorSubject<number> = new BehaviorSubject(0); // (0, listLength]
+    activeListItemIndex: WritableSignal<number> = signal(0); // (0, listLength]
 
     inputElement = viewChild.required<ElementRef<HTMLInputElement>>("inputRef");
     clearBtnElement =
@@ -114,10 +116,10 @@ export class HomePage implements OnInit {
         shareReplay(this.shareReplayConfig)
     );
 
-    getNextListIndexToSelect = ([direction, currentSelectedIndex]: [
-        number,
-        number,
-    ]): number => {
+    getNextListIndexToSelect = (
+        direction: ArrowKeyDirection,
+        currentSelectedIndex: number
+    ): number => {
         const listItems = this.listItemElements();
         const nextPresumedValue = currentSelectedIndex + direction;
 
@@ -279,15 +281,16 @@ export class HomePage implements OnInit {
                     statusReport.status === "resolved" ? statusReport.value : []
             )
         )
-    ).pipe(tap((_) => this.activeListItemIndex$.next(_.length)));
+    ).pipe(tap((_) => this.activeListItemIndex.set(_.length)));
 
     listNavigation$: Observable<unknown> = merge(
         this.documentArrowDown$,
         this.documentArrowUp$
     ).pipe(
-        withLatestFrom(this.activeListItemIndex$),
-        map(this.getNextListIndexToSelect),
-        tap((newIndex) => this.activeListItemIndex$.next(newIndex)),
+        map((direction) =>
+            this.getNextListIndexToSelect(direction, this.activeListItemIndex())
+        ),
+        tap((newIndex) => this.activeListItemIndex.set(newIndex)),
         withLatestFrom(this.inputValueTrimmed$),
         tap(this.selectListItem)
     );
@@ -302,19 +305,21 @@ export class HomePage implements OnInit {
 
     handleUserChoice$: Observable<unknown> = this.documentEnter$.pipe(
         filter(this.isUserFocusedOnListItem),
-        withLatestFrom(this.activeListItemIndex$, this.searchResult$),
-        tap(([_, index, result]) => {
-            this.redirectBySelectedItem(index, result);
+        withLatestFrom(this.searchResult$),
+        tap(([_, result]) => {
+            this.redirectBySelectedItem(this.activeListItemIndex(), result);
         })
     );
 
-    ngOnInit() {
+    ngAfterViewInit() {
         queueMicrotask(() =>
             // Update view in Microtask queue, so Angular would't be angry
             // about changing value after it was checked
             this.setInputValue(this.getQueryFromSessionStorage())
         );
+    }
 
+    ngOnInit() {
         fromEvent<KeyboardEvent>(this.document, "keydown")
             .pipe(this.untilDestroyed())
             .subscribe(this.hostKeydown$);
