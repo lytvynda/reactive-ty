@@ -2,7 +2,7 @@
     @for (row of keyboardMatrix; track row; let rowIdx = $index) {
     <div class="keyboard__row">
         @for (key of row; track key; let keyIdx = $index) {
-        <div [ngClass]="['keyboard__key', 'keyboard__key--' + key.c | lowercase]" [attr.data-key]="key.c" #key>
+        <div [ngClass]="['keyboard__key', 'keyboard__key--' + key | lowercase]" [attr.data-key]="key" #key>
         </div>
         }
     </div>
