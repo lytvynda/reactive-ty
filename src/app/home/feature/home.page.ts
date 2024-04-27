@@ -83,7 +83,7 @@ const listAnimation = trigger("listAnimation", [
 })
 export class HomePage implements OnInit, AfterViewInit {
     untilDestroyed = untilDestroyed();
-    shareReplayConfig = { bufferSize: 1, refCount: false };
+    sharedReplayConfig = { bufferSize: 1, refCount: false };
 
     hostKeydown$: Subject<KeyboardEvent> = new Subject();
     activeListItemIndex: WritableSignal<number> = signal(0); // (0, listLength]
@@ -106,14 +106,14 @@ export class HomePage implements OnInit, AfterViewInit {
                 fromEvent<KeyboardEvent>(nativeElement, "paste")
             )
         ),
-        shareReplay(this.shareReplayConfig)
+        shareReplay(this.sharedReplayConfig)
     );
 
     clearButtonClick$ = this.clearBtnElement$.pipe(
         switchMap(({ nativeElement }) =>
             fromEvent<MouseEvent>(nativeElement, "click")
         ),
-        shareReplay(this.shareReplayConfig)
+        shareReplay(this.sharedReplayConfig)
     );
 
     getNextListIndexToSelect = (
@@ -242,13 +242,13 @@ export class HomePage implements OnInit, AfterViewInit {
                 event.type === "keyup" &&
                 (event as KeyboardEvent)?.key === "Backspace"
         ),
-        shareReplay({ bufferSize: 1, refCount: false })
+        shareReplay(this.sharedReplayConfig)
     );
 
     inputValueTrimmed$: Observable<string> = this.inputChange$.pipe(
         map(this.getInputValueFromEvent),
         map((value) => value.trim()),
-        shareReplay({ bufferSize: 1, refCount: false })
+        shareReplay(this.sharedReplayConfig)
     );
 
     searchResponse$: Observable<ProclaimedStatus<Array<string>>> =
@@ -260,10 +260,7 @@ export class HomePage implements OnInit, AfterViewInit {
             switchMap((query) =>
                 of(["one", "two", "three"]).pipe(delay(200), withStatusProclaim)
             ),
-            shareReplay({
-                bufferSize: 1,
-                refCount: false,
-            })
+            shareReplay(this.sharedReplayConfig)
         );
 
     resetSearchResult$: Observable<Array<string>> = merge(
