@@ -12,6 +12,7 @@
   background: transparent;
   margin: 400px auto 0;
   border-radius: 5px;
+  transition: width 0.3s ease-in-out;
 
   .row {
     display: flex;
@@ -45,6 +46,7 @@
       border: 0;
       outline: 0;
       font-size: 18px;
+      font-family: 'Comme', sans-serif;
       color: #333;
     }
 
@@ -119,6 +121,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
     border: none;
+    font-family: 'Comme', sans-serif;
   }
 
   .search-form__search-result ul li::after {
@@ -169,9 +172,24 @@
   }
 }
 
-@media (max-width: 700px) {
-  .search-box {
-    width: 80%;
+@media (max-width: 767px) {
+  .search-form {
+    width: 90%;
+    min-width: 375px;
+    margin: 0;
+    position: absolute;
+    left: 5%;
+    top: 25%;
+    transform: translate(0, -25%);
+
+    .search-box {
+      width: 80%;
+    }
   }
 }
 
+@media (max-width: 1200px) {
+  .animated-bg {
+    display: none;
+  }
+}
