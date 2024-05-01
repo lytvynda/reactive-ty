@@ -1,39 +1,39 @@
 import {
-    AfterViewInit,
-    Component,
-    ElementRef,
     Inject,
     OnInit,
-    WritableSignal,
     signal,
+    Component,
     viewChild,
+    ElementRef,
     viewChildren,
+    AfterViewInit,
+    WritableSignal,
 } from "@angular/core";
 import { toObservable } from "@angular/core/rxjs-interop";
 import { DOCUMENT } from "@angular/common";
 import {
     style,
+    query,
     stagger,
     trigger,
-    transition,
     animate,
-    query,
+    transition,
 } from "@angular/animations";
 import {
-    debounceTime,
-    delay,
-    distinctUntilChanged,
-    filter,
-    fromEvent,
-    map,
-    merge,
-    Observable,
     of,
-    shareReplay,
-    Subject,
-    switchMap,
+    map,
     tap,
+    delay,
+    filter,
+    merge,
+    Subject,
+    fromEvent,
+    switchMap,
+    Observable,
+    shareReplay,
+    debounceTime,
     withLatestFrom,
+    distinctUntilChanged,
 } from "rxjs";
 import type { ProclaimedStatus } from "@shared/utils/operators";
 import { untilDestroyed, withStatusProclaim } from "@shared/utils/operators";
@@ -57,7 +57,7 @@ function mod(n: number, m: number): number {
     return ((n % m) + m) % m;
 }
 
-const listAnimation = trigger("listAnimation", [
+const listAnimation = trigger("listUnfoldAnimation", [
     transition(":enter", [
         query(
             ".js-list-item",
@@ -81,7 +81,7 @@ const listAnimation = trigger("listAnimation", [
     styleUrls: ["./home.page.scss"],
     animations: [listAnimation],
 })
-export class HomePage implements OnInit, AfterViewInit {
+export class HomePageComponent implements OnInit, AfterViewInit {
     untilDestroyed = untilDestroyed();
     sharedReplayConfig = { bufferSize: 1, refCount: false };
 
@@ -204,7 +204,7 @@ export class HomePage implements OnInit, AfterViewInit {
         return isResolved && !inputIsEmpty && responseLength === 0;
     };
 
-    isUserFocusedOnListItem = (): boolean => {
+    isListItemFocused = (): boolean => {
         return this.document.activeElement?.tagName === "LI";
     };
 
@@ -293,7 +293,7 @@ export class HomePage implements OnInit, AfterViewInit {
     );
 
     setInputFocus$: Observable<unknown> = this.hostKeydown$.pipe(
-        filter(this.isUserFocusedOnListItem),
+        filter(this.isListItemFocused),
         filter(
             (event) => !["ArrowDown", "ArrowUp", "Enter"].includes(event.key)
         ),
@@ -301,7 +301,7 @@ export class HomePage implements OnInit, AfterViewInit {
     );
 
     handleUserChoice$: Observable<unknown> = this.documentEnter$.pipe(
-        filter(this.isUserFocusedOnListItem),
+        filter(this.isListItemFocused),
         withLatestFrom(this.searchResult$),
         tap(([_, result]) => {
             this.redirectBySelectedItem(this.activeListItemIndex(), result);

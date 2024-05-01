@@ -1,4 +1,6 @@
-<app-keyboard></app-keyboard>
+<div class="animated-bg">
+  <app-keyboard></app-keyboard>
+</div>
 
 <form action="#" method="GET" class="search-form">
   <div class="row">
@@ -27,7 +29,7 @@
     </div>
     } @else {
     <div class="search-form__search-result">
-      <ul [@listAnimation]="data.results?.length">
+      <ul [@listUnfoldAnimation]="data.results?.length">
         @for (suggestion of data.results; track suggestion;
         let idx = $index) {
         <li class="js-list-item" [tabIndex]="idx" (click)="redirectBySelectedItem(idx, data.results || [])"
