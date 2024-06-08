@@ -137,7 +137,8 @@
     opacity: 0;
   }
 
-  .search-form__search-result ul li:focus::after {
+  .search-form__search-result ul li:focus::after,
+  .search-form__search-result ul li:hover::after {
     opacity: 1;
   }
 
