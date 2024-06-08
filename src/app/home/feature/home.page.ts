@@ -35,26 +35,13 @@ import {
     withLatestFrom,
     distinctUntilChanged,
 } from "rxjs";
-import type { ProclaimedStatus } from "@shared/utils/operators";
-import { untilDestroyed, withStatusProclaim } from "@shared/utils/operators";
+import type { ProclaimedStatus } from "@shared/operators";
+import { untilDestroyed, withStatusProclaim } from "@shared/operators";
+import { mod } from "@shared/utils";
 
 enum ArrowKeyDirection {
     Up = -1,
     Down = 1,
-}
-
-/**
- * Calculates the correct modulo operation in JavaScript, handling negative numbers.
- *
- * JavaScript's native modulo operator (%) may not behave as expected for negative numbers.
- * This function ensures correct modulo calculation for both positive and negative numbers.
- *
- * @param {number} n - The dividend.
- * @param {number} m - The divisor.
- * @returns {number} The result of the modulo operation (n % m).
- */
-function mod(n: number, m: number): number {
-    return ((n % m) + m) % m;
 }
 
 const listAnimation = trigger("listUnfoldAnimation", [
@@ -237,7 +224,7 @@ export class HomePageComponent implements OnInit, AfterViewInit {
     );
 
     inputBackspace$: Observable<KeyboardEvent> = this.inputChange$.pipe(
-        filter<any>(
+        filter(
             (event) =>
                 event.type === "keyup" &&
                 (event as KeyboardEvent)?.key === "Backspace"

@@ -9,9 +9,8 @@ import {
     ViewChildren,
     QueryList,
 } from "@angular/core";
-import { untilDestroyed } from "@shared/utils/operators";
+import { untilDestroyed } from "@shared/operators";
 import { Subject, distinctUntilChanged, filter, map, tap } from "rxjs";
-
 
 @Component({
     selector: "app-keyboard",
