@@ -50,7 +50,7 @@ jobs:
           run: yarn run build
 
         - name: Update pages artifacts
-          uses: actions/upload-pages-artifact@3.0.0
+          uses: actions/upload-pages-artifact@v3.0.1
           with:
             path: dist/
     

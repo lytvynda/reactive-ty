@@ -103,7 +103,7 @@ export class HomePageComponent implements OnInit, AfterViewInit {
         shareReplay(this.sharedReplayConfig)
     );
 
-    getNextListIndexToSelect = (
+    getNextListItemIndexToSelect = (
         direction: ArrowKeyDirection,
         currentSelectedIndex: number
     ): number => {
@@ -172,7 +172,7 @@ export class HomePageComponent implements OnInit, AfterViewInit {
             // of the value could be Session Storage.
             return (
                 inputValueFromClipboard ??
-                this.getQueryFromSessionStorage() ??
+                this.getUserQueryFromSessionStorage() ??
                 ""
             );
         }
@@ -195,13 +195,21 @@ export class HomePageComponent implements OnInit, AfterViewInit {
         return this.document.activeElement?.tagName === "LI";
     };
 
-    saveQueryToSessionStorage = (value: string): void => {
-        sessionStorage.setItem(`${this.constructor.name}_searchQuery`, value);
+    getSearchQueryKeyForSessionStorage = (): string => {
+        return `${this.constructor.name}_searchQuery`;
     };
 
-    getQueryFromSessionStorage = (): string => {
+    saveQueryToSessionStorage = (value: string): void => {
+        sessionStorage.setItem(
+            this.getSearchQueryKeyForSessionStorage(),
+            value
+        );
+    };
+
+    getUserQueryFromSessionStorage = (): string => {
         return (
-            sessionStorage.getItem(`${this.constructor.name}_searchQuery`) ?? ""
+            sessionStorage.getItem(this.getSearchQueryKeyForSessionStorage()) ??
+            ""
         );
     };
 
@@ -240,7 +248,7 @@ export class HomePageComponent implements OnInit, AfterViewInit {
 
     searchResponse$: Observable<ProclaimedStatus<Array<string>>> =
         this.inputValueTrimmed$.pipe(
-            debounceTime(300),
+            debounceTime(200),
             distinctUntilChanged(),
             tap(this.saveQueryToSessionStorage),
             filter(Boolean),
@@ -272,7 +280,10 @@ export class HomePageComponent implements OnInit, AfterViewInit {
         this.documentArrowUp$
     ).pipe(
         map((direction) =>
-            this.getNextListIndexToSelect(direction, this.activeListItemIndex())
+            this.getNextListItemIndexToSelect(
+                direction,
+                this.activeListItemIndex()
+            )
         ),
         tap((newIndex) => this.activeListItemIndex.set(newIndex)),
         withLatestFrom(this.inputValueTrimmed$),
@@ -281,9 +292,7 @@ export class HomePageComponent implements OnInit, AfterViewInit {
 
     setInputFocus$: Observable<unknown> = this.hostKeydown$.pipe(
         filter(this.isListItemFocused),
-        filter(
-            (event) => !["ArrowDown", "ArrowUp", "Enter"].includes(event.key)
-        ),
+        filter(({ key }) => !["ArrowDown", "ArrowUp", "Enter"].includes(key)),
         tap(() => this.inputElement().nativeElement.focus())
     );
 
@@ -299,7 +308,7 @@ export class HomePageComponent implements OnInit, AfterViewInit {
         queueMicrotask(() =>
             // Update view in Microtask queue, so Angular would't be angry
             // about changing value after it was checked
-            this.setInputValue(this.getQueryFromSessionStorage())
+            this.setInputValue(this.getUserQueryFromSessionStorage())
         );
     }
 

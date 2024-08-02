@@ -93,7 +93,7 @@ export class KeyboardComponent implements AfterViewInit, OnDestroy {
 
         this.keyboardRef.nativeElement.style.setProperty(
             "transform",
-            `translate(-70%, ${translateY}%) rotate(-20deg)`
+            `translate(-80%, ${translateY}%) rotate(-25deg)`
         );
     }
 
