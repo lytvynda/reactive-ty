@@ -47,7 +47,7 @@ jobs:
 #          run: yarn run test
  
         - name: Build
-          run: yarn run build
+          run: yarn run build-gh-pages
 
         - name: Update pages artifacts
           uses: actions/upload-pages-artifact@v3.0.1
